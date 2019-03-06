@@ -1,70 +1,48 @@
 const express = require('express');
 const ExpressError = require('./expressError');
+const { mean, median, mode } = require('./operations');
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
-// app.get("/mean", function(req, res, next){
-//     const nums = req.query.nums.split(',').map(Number);
-
-//     let mean = nums.reduce((a, b) => a + b, 0) / nums.length;
-
-//     return res.json({response: {
-//                         operation: "mean",
-//                         value: mean
-//                         }
-//                     });
-// });
-
-function mean(arr){
-    return arr.reduce((a, b) => a + b, 0) / arr.length;
-}
-
-function mode(arr){
-    let counter = {};
-    let max = 0;
-    let mode;
-
-    for(ele of arr){
-        counter[ele] = counter[ele] + 1 || 1;
-        if(counter[ele] > max){
-            max = counter[ele];
-            mode = ele;
-        }
-    }
-
-    return mode;
-}
 
 app.get("/:operation", function(req, res, next){
-    const nums = req.query.nums.split(',').map(Number);
-    const operation = req.params.operation;
 
-    let value;
-
-    if(operation === "mean"){
-        value = mean(nums);
-    }
-    else if(operation === "median"){
-        nums.sort((a, b) => a - b);
-        if(nums.length % 2 === 1){
-            value = nums[Math.floor(nums.length / 2)];
+    console.log(req.params, req.query)
+    try {
+        if(!req.query.nums){
+            throw new ExpressError("Nums are required.", "400")
         }
-        else{
-            value = mean([nums[nums.length / 2], nums[nums.length / 2 - 1]]);
-        }
-    }
-    else if(operation === "mode"){
-            value = mode(nums);
-    }
+        const nums = req.query.nums.split(',').map(Number);
 
-    return res.json({response: {
-                        operation,
-                        value
-                        }
-                    });
+        if(!nums.every(Number.isInteger)){
+            throw new ExpressError("Nums should be numbers.", "400")
+        }
+
+        const operation = req.params.operation;
+    
+        let value;
+    
+        if(operation === "mean"){
+            value = mean(nums);
+        }
+        else if(operation === "median"){
+            value = median(nums);
+        }
+        else if(operation === "mode"){
+                value = mode(nums);
+        }
+    
+        return res.json({response: {
+                            operation,
+                            value
+                            }
+                        });
+    }catch(err) {
+        return next(err);
+    }
 })
 
 
