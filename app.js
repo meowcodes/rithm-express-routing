@@ -9,42 +9,39 @@ app.use(express.urlencoded({extended: true}));
 
 
 app.get("/:operation", function(req, res, next){
-
-    console.log(req.params, req.query)
     try {
+        // handle error if input missing
         if(!req.query.nums){
-            throw new ExpressError("Nums are required.", "400")
+            throw new ExpressError("Inputs are required.", "400")
         }
+
         const nums = req.query.nums.split(',').map(Number);
 
+        // handle error if input invlid
         if(!nums.every(Number.isInteger)){
-            throw new ExpressError("Nums should be numbers.", "400")
+            throw new ExpressError("Inputs should be numbers.", "400")
         }
 
         const operation = req.params.operation;
-    
         let value;
-    
-        if(operation === "mean"){
-            value = mean(nums);
-        }
-        else if(operation === "median"){
-            value = median(nums);
-        }
-        else if(operation === "mode"){
+        
+        // send mean if invalid operation param given
+        switch(operation) {
+            case "median":
+                value = median(nums);
+                break;
+            case "mode":
                 value = mode(nums);
+                break;
+            default:
+                value = mean(nums);
         }
     
-        return res.json({response: {
-                            operation,
-                            value
-                            }
-                        });
+        return res.json({response: { operation, value }});
     }catch(err) {
         return next(err);
     }
 })
-
 
 
 // 404 handler
@@ -67,7 +64,7 @@ app.use(function(err, req, res, next) {
     });
 });
 
-// strat server
+// start server
 app.listen(3000, function(){
-    console.log('We made it to port 3000!')
+    console.log('listening on 3000')
 })

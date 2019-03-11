@@ -1,7 +1,9 @@
+/** returns the mean of nums in array */
 function mean(arr){
     return arr.reduce((a, b) => a + b, 0) / arr.length;
 }
 
+/** returns the mean of nums in array */
 function median(arr){
     arr.sort((a, b) => a - b);
     
@@ -14,6 +16,7 @@ function median(arr){
     return value;
 }
 
+/** returns the mode of nums in array */
 function mode(arr){
     let counter = {};
     let max = 0;
